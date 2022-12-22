@@ -1,6 +1,6 @@
 income = int(input("income: "))
 age = int(input("age: "))
-civil_state = str(input("civil state(s, c, d): "))
+civil_state = str(input("civil state(s, c): "))
 loan = int(input("loan: "))
 score = int(input("score: "))
 dependents = int(input("dependents: "))
@@ -8,55 +8,63 @@ answear = 0
 
 print("")
 
-def incomeCalc(a):
-    if a >= 0 and a < 2000:
+def incomeCalc(inc, xinc):
+    dif = abs(inc - xinc)
+    if dif >= 0 and dif < 2000:
            return 1
-    elif a >= 2000 and a < 5000:
+    elif dif >= 2000 and dif < 5000:
            return 0.7
-    elif a >= 5000 and a <= 8000:
+    elif dif >= 5000 and dif <= 8000:
            return 0.4
-    elif a > 8000:
+    elif dif > 8000:
            return 0
 
-def ageCalc(b):
-    if b >= 0 and b < 5:
-           b = 1
-    elif b >= 5 and b < 8:
-        b = 0.7
-    elif b >= 8 and b <= 12:
-        b = 0.4
-    elif b > 12:
-        b = 0
-
-def loanCalc(inc, loa):
-    if loa <= inc:
-        return 1
-    elif loa > inc and loa <= 2*(inc):
-        return 0.4
-    elif loa > 2*(inc) and loa <= 3*(inc):
+def ageCalc(age, xage):
+    dif = abs(age - xage)
+    if dif >= 0 and dif < 5:
+           return 1
+    elif dif >= 5 and dif < 8:
         return 0.7
-    elif loa >= 3*(inc):
+    elif dif >= 8 and dif <= 12:
+        return 0.4
+    elif dif > 12:
         return 0
 
-def scoreCalc(c):
-    if c <= 200:
+def civCalc(civ, xciv):
+    if civ != xciv:
         return 0
-    elif c > 200 and c < 400:
-        return 0.4
-    elif c >= 400 and c < 700:
-        return 0.7
-    elif c >= 700:
+    else:
         return 1
 
-def depenCalc(d):
-    if d == 0:
+def loanCalc(loa, xloa):
+    dif = abs(loa - xloa)
+    if dif < 2_000:
         return 1
-    elif d > 0 and d <= 2:
+    elif dif >= 2_000 and dif < 5_000:
         return 0.7
-    elif d == 3:
+    elif dif >= 5_000 and dif < 10_000:
         return 0.4
-    elif d >= 4:
+    elif dif >= 10_000 and dif < 20_000:
+        return 0.2
+    elif dif >= 20_000:
         return 0
+
+def scoreCalc(sco, xsco):
+    dif = abs(sco - xsco)
+    if dif <= 200:
+        return 1
+    elif dif > 200 and dif < 400:
+        return 0.7
+    elif dif >= 400 and dif < 800:
+        return 0.4
+    elif dif >= 800:
+        return 0
+
+def depenCalc(dep, xdep):
+    if dep != xdep:
+        return 0
+    else:
+        return 1
 
 with open('data.txt', "r+") as d:
     case = 0
@@ -69,46 +77,28 @@ with open('data.txt', "r+") as d:
 
         Xincome, Xage, Xcivil_state, Xloan, Xscore, Xdependents, Xanswear = line.split(", ")
 
-        incomeNum = incomeCalc(income)
-        Xincome = incomeCalc(int(Xincome))
-        simIncome = (1 - (abs(int(Xincome) - incomeNum)/(1-0)))
+        incomeCompat = incomeCalc(income, int(Xincome))
+        ageCompat = ageCalc(age, int(Xage))
+        civCompat = civCalc(civil_state, Xcivil_state)
+        loanCompat = loanCalc(loan, int(Xloan))
+        scoreCompat = scoreCalc(score, int(Xscore))
+        depenCompat = depenCalc(dependents, int(Xdependents))
 
-        ageNum = incomeCalc(age)
-        Xage = incomeCalc(int(Xage))
-        simAge = (1 - (abs(int(Xage) - ageNum)/(1-0)))
+        caseCompatibility = (((5*incomeCompat) + (3*ageCompat) + (1*civCompat) + (4*loanCompat) + (5*scoreCompat) + (3*depenCompat)) / 21)
 
-        if civil_state == Xcivil_state:
-            simCivil_state = 1
-        else:
-            simCivil_state = 0
-
-        loanNum = loanCalc(income, loan)
-        Xloan = loanCalc(int(Xincome), int(Xloan))
-        simLoan = (1 - (abs(int(Xloan) - loanNum)/(1-0)))
-
-        scoreNum = scoreCalc(score)
-        Xscore = scoreCalc(int(Xscore))
-        simScore = (1 - (abs(int(Xscore) - scoreNum)/(1-0)))
-
-        dependentsNum = depenCalc(dependents)
-        Xdependents = depenCalc(int(Xdependents))
-        simDepen = (1 - (abs(int(Xdependents) - dependentsNum)/(1-0)))
-
-        Xcompatibility = (((5*simIncome) + (3*simAge) + (1*simCivil_state) + (4*simLoan) + (5*simScore) + (3*simDepen)) / 21)
-
-        if Xcompatibility > compatibility:
+        if caseCompatibility > compatibility:
             mostCompatible = case
-            compatibility = Xcompatibility
+            compatibility = caseCompatibility
             answear = Xanswear
 
         print("case %d" %(case))
-        print("income compatibility: ", simIncome)
-        print("age compatibility: ", simAge)
-        print("civil state compatibility: ", simCivil_state)
-        print("loan compatibility: ", simLoan)
-        print("score compatibility: ", simScore)
-        print("dependents compatibility: ", simDepen)
-        print("avarage: %f" %(Xcompatibility))
+        print("income compatibility: ", incomeCompat)
+        print("age compatibility: ", ageCompat)
+        print("civil state compatibility: ", civCompat)
+        print("loan compatibility: ", loanCompat)
+        print("score compatibility: ", scoreCompat)
+        print("dependents compatibility: ", depenCompat)
+        print("avarage: %f" %(caseCompatibility))
         print("")
     d.close()
     pass
